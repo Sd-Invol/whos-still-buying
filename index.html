@@ -20,7 +20,9 @@
       var keyToIdx = {};
       for (let date in db.rankings) {
         dates.push(date);
-        for (let i = 0; i < topK; ++i) {
+      }
+      for (let i = 0; i < topK; ++i) {
+        for (let date in db.rankings) {
           var game = db.rankings[date][i];
           if (!gameList.includes(game)) {
             keyToIdx[game] = gameList.length;
@@ -28,7 +30,6 @@
           }
         }
       }
-      console.log(gameList);
       var listDom = document.getElementById('list');
       for (let game of gameList) {
         var img = document.createElement('img');
@@ -37,7 +38,7 @@
         listDom.appendChild(img);
       }
 
-      var yRankData = [`${topK}+`];
+      var yRankData = [`${topK + 1}+`];
       for (let rank = topK; rank > 0; --rank) {
         yRankData.push(rank.toString());
       }
@@ -52,7 +53,7 @@
         };
 
         for (let date in db.rankings) {
-          var rank = `${topK}+`;
+          var rank = `${topK + 1}+`;
           for (let i = 0; i < topK; ++i) {
             if (db.rankings[date][i] == game) {
               rank = i + 1;
@@ -97,7 +98,6 @@
       async (req) => {
         const gist = await req.json();
         db = JSON.parse(gist.files['db.json'].content);
-        console.log(db);
         draw();
       }
     );
