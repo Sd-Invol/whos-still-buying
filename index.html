@@ -1,0 +1,107 @@
+<html>
+
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+</head>
+
+<body>
+  <div id="main" style="width: 100%; height:100%;"></div>
+  <div id="list" style="margin-top: 8px;">
+
+  </div>
+  <script>
+    var topK = 15
+    var db = {}
+    function draw() {
+      var myChart = echarts.init(document.getElementById('main'));
+
+      var gameList = [];
+      var dates = []
+      var keyToIdx = {};
+      for (let date in db.rankings) {
+        dates.push(date);
+        for (let i = 0; i < topK; ++i) {
+          var game = db.rankings[date][i];
+          if (!gameList.includes(game)) {
+            keyToIdx[game] = gameList.length;
+            gameList.push(game);
+          }
+        }
+      }
+      console.log(gameList);
+      var listDom = document.getElementById('list');
+      for (let game of gameList) {
+        var img = document.createElement('img');
+        img.src = db.games[game].logo_url;
+        img.style.width = '16.66%';
+        listDom.appendChild(img);
+      }
+
+      var yRankData = [`${topK}+`];
+      for (let rank = topK; rank > 0; --rank) {
+        yRankData.push(rank.toString());
+      }
+
+      var seriesList = [];
+
+      for (let game of gameList) {
+        var series = {
+          name: db.games[game].name,
+          type: 'line',
+          data: []
+        };
+
+        for (let date in db.rankings) {
+          var rank = `${topK}+`;
+          for (let i = 0; i < topK; ++i) {
+            if (db.rankings[date][i] == game) {
+              rank = i + 1;
+              break;
+            }
+          }
+          series.data.push(rank.toString());
+        }
+        seriesList.push(series);
+      }
+
+      var option = {
+        title: {
+          text: ''
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        legend: {
+          bottom: 0,
+          type: 'scroll'
+        },
+        grid: {
+        },
+        xAxis: {
+          type: 'category',
+          data: []
+        },
+        yAxis: {
+          type: 'category',
+          data: yRankData
+        },
+        series: seriesList
+      };
+
+      option.xAxis.data = dates;
+
+      myChart.setOption(option);
+    }
+
+    fetch(`https://api.github.com/gists/656e2d6f862b601f8c10808318ebf9d3`).then(
+      async (req) => {
+        const gist = await req.json();
+        db = JSON.parse(gist.files['db.json'].content);
+        console.log(db);
+        draw();
+      }
+    );
+  </script>
+</body>
+
+</html>
