@@ -11,14 +11,12 @@
 
   </div>
   <script>
-    var topK = 15
     var db = {}
-    function draw() {
+    function draw(topK = 15) {
       var myChart = echarts.init(document.getElementById('main'));
 
       var gameList = [];
       var dates = []
-      var keyToIdx = {};
       for (let date in db.rankings) {
         dates.push(date);
       }
@@ -26,12 +24,12 @@
         for (let date in db.rankings) {
           var game = db.rankings[date][i];
           if (!gameList.includes(game)) {
-            keyToIdx[game] = gameList.length;
             gameList.push(game);
           }
         }
       }
       var listDom = document.getElementById('list');
+      listDom.innerHTML = '';
       for (let game of gameList) {
         var img = document.createElement('img');
         img.src = db.games[game].logo_url;
@@ -89,7 +87,6 @@
         },
         series: seriesList
       };
-
       option.xAxis.data = dates;
 
       myChart.setOption(option);
