@@ -21,7 +21,7 @@
         dates.push(date);
       }
       for (let i = 0; i < topK; ++i) {
-        for (let date in db.rankings) {
+        for (let date of dates) {
           var game = db.rankings[date][i];
           if (!gameList.includes(game)) {
             gameList.push(game);
@@ -31,13 +31,18 @@
       var listDom = document.getElementById('list');
       listDom.innerHTML = '';
       for (let game of gameList) {
+        var anchor = document.createElement('a');
+        anchor.href = db.games[game].store_url;
+        anchor.target = 'top_';
         var img = document.createElement('img');
         img.src = db.games[game].logo_url;
-        img.style.width = '16.666%';
-        listDom.appendChild(img);
+        img.style.width = '12.5%';
+        anchor.appendChild(img);
+        listDom.appendChild(anchor);
       }
 
-      var yRankData = [`${topK + 1}+`];
+      var topKPlus = `${topK + 1}+`;
+      var yRankData = [topKPlus];
       for (let rank = topK; rank > 0; --rank) {
         yRankData.push(rank.toString());
       }
@@ -52,7 +57,7 @@
         };
 
         for (let date in db.rankings) {
-          var rank = `${topK + 1}+`;
+          var rank = topKPlus;
           for (let i = 0; i < topK; ++i) {
             if (db.rankings[date][i] == game) {
               rank = i + 1;
@@ -60,6 +65,9 @@
             }
           }
           series.data.push(rank.toString());
+        }
+        while (series.data.length > 1 && series.data[series.data.length - 1] == topKPlus && series.data[series.data.length - 2] == topKPlus) {
+          series.data.pop();
         }
         seriesList.push(series);
       }
