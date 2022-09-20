@@ -6,6 +6,13 @@
 </head>
 
 <body style="overflow-x: hidden;">
+  <div>
+    <label for="start">Start date:</label>
+    <input type="date" id="start_date" min="2022-06-26">
+    <label for="end" style="width: 100px;">End date:</label>
+    <input type="date" id="end_date">
+    <button onclick="draw()">Draw</button>
+  </div>
   <div id="main" style="width: 100%; height:100%;"></div>
   <div id="list" style="margin-top: 8px;">
 
@@ -14,11 +21,17 @@
     var db = {}
     function draw(topK = 15) {
       var myChart = echarts.init(document.getElementById('main'));
-
+      
+      var startDay = document.getElementById('start_date').value;
+      var endDay = document.getElementById('end_date').value;
+      
       var gameList = [];
       var dates = []
       for (let date in db.rankings) {
-        dates.push(date);
+        if (startDay <= date && date <= endDay) {
+          console.log(date);
+          dates.push(date);
+        }
       }
       for (let i = 0; i < topK; ++i) {
         for (let date of dates) {
@@ -57,14 +70,16 @@
         };
 
         for (let date in db.rankings) {
-          var rank = topKPlus;
-          for (let i = 0; i < topK; ++i) {
-            if (db.rankings[date][i] == game) {
-              rank = i + 1;
-              break;
+          if (startDay <= date && date <= endDay) {
+            var rank = topKPlus;
+            for (let i = 0; i < topK; ++i) {
+              if (db.rankings[date][i] == game) {
+                rank = i + 1;
+                break;
+              }
             }
+            series.data.push(rank.toString());
           }
-          series.data.push(rank.toString());
         }
         while (series.data.length > 1 && series.data[series.data.length - 1] == topKPlus && series.data[series.data.length - 2] == topKPlus) {
           series.data.pop();
@@ -104,6 +119,12 @@
       async (req) => {
         const gist = await req.json();
         db = JSON.parse(gist.files['db.json'].content);
+        var endDay = new Date();
+        var startDay = new Date();
+        endDay.setDate(endDay.getDate() - 1);
+        startDay.setDate(endDay.getDate() - 30);
+        document.getElementById('start_date').valueAsDate = startDay;
+        document.getElementById('end_date').valueAsDate = endDay;
         draw();
       }
     );
